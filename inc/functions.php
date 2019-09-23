@@ -18,12 +18,24 @@ function selectQuestion()  {
 
   $totalRounds = count($questions);
 
+  //-------------------------------
+
+  $remaining = array_keys($_SESSION['questionAnswered'],FALSE);
+
+  echo "<br> REMAINING";
+  var_dump($remaining);
+  echo "<br><BR>";
+
+  //---------------------------------
+
+
+
   $currentQuestion = array_rand($questions);
 
-  $question = Array();
+  $questionDetails = Array();
 
-  $question["rightAdder"] = $questions[$currentQuestion]->rightAdder;
-  $question["leftAdder"] = $questions[$currentQuestion]->leftAdder;
+  $questionDetails["rightAdder"] = $questions[$currentQuestion]->rightAdder;
+  $questionDetails["leftAdder"] = $questions[$currentQuestion]->leftAdder;
 
   $answers = array();
   $answers = [
@@ -33,11 +45,11 @@ function selectQuestion()  {
             ];
   shuffle($answers);
 
-  $question["firstAnswer"] = $answers[0];
-  $question["secondAnswer"] = $answers[1];
-  $question["thirdAnswer"] = $answers[2];
+  $questionDetails["firstAnswer"] = $answers[0];
+  $questionDetails["secondAnswer"] = $answers[1];
+  $questionDetails["thirdAnswer"] = $answers[2];
 
-  return array ($question,$currentQuestion,$totalRounds);
+  return array ($questionDetails,$currentQuestion,$totalRounds);
 }
 
 ?>
