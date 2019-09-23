@@ -1,42 +1,68 @@
 <?php
 
-function selectQuestion()  {
-  // created this function, so I'm flexible when I want to change the source of the $questions
-  // so i won't have to change index.php
-
+function validateAnswer($previousQuestion,$answer) {
+  // path to JSON file with questions
   $path = 'inc/questions.json';
 
+  //validate whether path exists, to avoid errors in the json_decode later
   if (!file_exists($path)) {
     return FALSE;
   }
 
+  // create questions objects from json file
   $questions = json_decode(file_get_contents($path));
 
+  // validate whether questions contain objects
   if(!is_object($questions[0])) {
     return FALSE;
   }
 
+  if ($questions[$previousQuestion]->correctAnswer == $answer) {
+    return TRUE;
+  } else {
+    return FALSE;
+  }
+
+}
+
+function selectQuestion()  {
+  // created this function, so I'm flexible when I want to change the source of the $questions
+  // so i won't have to change index.php
+
+  // path to JSON file with questions
+  $path = 'inc/questions.json';
+
+  //validate whether path exists, to avoid errors in the json_decode later
+  if (!file_exists($path)) {
+    return FALSE;
+  }
+
+  // create questions objects from json file
+  $questions = json_decode(file_get_contents($path));
+
+  // validate whether questions contain objects
+  if(!is_object($questions[0])) {
+    return FALSE;
+  }
+
+  // calculate the total number of rounds
   $totalRounds = count($questions);
 
-  //-------------------------------
+  // select the keys of the questions which have not been answered yet
+  // thanks to https://stackoverflow.com/questions/38195517/choose-random-index-of-array-with-condition-on-value for selecting keys from the array with only non answered questions
+  $remainingQuestions = array_keys($_SESSION['questionAnswered'],FALSE);
 
-  $remaining = array_keys($_SESSION['questionAnswered'],FALSE);
+  // randomly select ID of one of the remaining questions
+  $currentQuestion = $remainingQuestions[array_rand($remainingQuestions)];
 
-  echo "<br> REMAINING";
-  var_dump($remaining);
-  echo "<br><BR>";
-
-  //---------------------------------
-
-
-
-  $currentQuestion = array_rand($questions);
-
+  // create new array  for all relevant question details, which will also contain the answers in random order, which is not possible in the object properties
   $questionDetails = Array();
 
+  // copy details from object to array
   $questionDetails["rightAdder"] = $questions[$currentQuestion]->rightAdder;
   $questionDetails["leftAdder"] = $questions[$currentQuestion]->leftAdder;
 
+  // the part to put the answers in random order, making use of shuffle
   $answers = array();
   $answers = [
               $questions[$currentQuestion]->correctAnswer,
@@ -45,10 +71,12 @@ function selectQuestion()  {
             ];
   shuffle($answers);
 
+  // adding the randomly ordered answers to the question details array
   $questionDetails["firstAnswer"] = $answers[0];
   $questionDetails["secondAnswer"] = $answers[1];
   $questionDetails["thirdAnswer"] = $answers[2];
 
+  // return the question details, the ID of the selected question (currentQuestion) and the total number of rounds
   return array ($questionDetails,$currentQuestion,$totalRounds);
 }
 
