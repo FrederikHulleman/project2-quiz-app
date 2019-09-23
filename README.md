@@ -1,2 +1,3 @@
-# project2-quiz-app
- 2nd PHP techdegree project
+# PHP Techdegree project 2: Quiz App
+#
+# App for students practicing additions 
