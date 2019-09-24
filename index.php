@@ -9,19 +9,22 @@ $resultMessage = "";
 // Keep track of which questions have been asked
 // My  approach: a question has been asked, when an answer  was submitted and NOT when it is displayed, to avoid strange situations when only refreshing
 if (isset($_POST['previousQuestion']) && isset($_POST['submittedAnswer'])) {
+  try {
+    $previousQuestion = $_POST['previousQuestion'];
+    $submittedAnswer = $_POST['submittedAnswer'];
 
-  $previousQuestion = $_POST['previousQuestion'];
-  $submittedAnswer = $_POST['submittedAnswer'];
+    if (validateAnswer($previousQuestion,$submittedAnswer)) {
+      $resultMessage = "Well done";
+    }
+    else {
+      $resultMessage = "Next time better";
+    }
 
-  if (validateAnswer($previousQuestion,$submittedAnswer)) {
-    $resultMessage = "Well done";
+  } catch (Exception $e) {
+    echo 'Caught exception: ' . $e->getMessage() . "\n";
   }
-  else {
-    $resultMessage = "Next time better";
-  }
 
-  // set session array for the previous question answered to true
-  $_SESSION['questionAnswered'][$previousQuestion] = TRUE;
+
 }
 
 //the round keeps track of how far the user got
@@ -29,11 +32,17 @@ $round = filter_input(INPUT_GET,'round',FILTER_SANITIZE_NUMBER_INT);
 
 //for the first round, it is initially set to 1
 if (empty($round)) {
-  if(retrieveQuestions() === FALSE) {
-    echo "The questions could not be displayed. Try again later.";
-    exit;
+  try {
+    session_destroy();
+    session_start();
+    retrieveQuestions();
+    $round = 1;
+    // echo "The questions could not be displayed. Try again later.";
+    // exit;
   }
-  $round = 1;
+  catch (Exception $e) {
+    echo 'Caught exception: ' . $e->getMessage() . "\n";
+  }
 }
 
 // after the last round, the user is redirected to the results page
@@ -42,10 +51,13 @@ if ($round > $_SESSION['totalRounds']) {
     exit;
 }
 
-//retrieve questions
-if (($questionDetails = selectQuestion()) === FALSE) {
-  echo "The questions could not be displayed. Try again later.";
-  exit;
+//select question
+try {
+  $questionDetails = selectQuestion();
+
+}
+catch (Exception $e) {
+  echo 'Caught exception: ' . $e->getMessage() . "\n";
 }
 
 ?>

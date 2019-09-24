@@ -10,7 +10,7 @@ function retrieveQuestions() {
 
   //validate whether path exists, to avoid errors in the json_decode later
   if (!file_exists($path)) {
-    return FALSE;
+    throw new Exception('Path to JSON file does not exist.');
   }
 
   // create questions objects from json file
@@ -18,7 +18,7 @@ function retrieveQuestions() {
 
   // validate whether questions contain objects
   if(!is_object($_SESSION['questionDetails'][0])) {
-    return FALSE;
+    throw new Exception('File does not contain valid JSON objects.');
   }
 
   // calculate the total number of rounds
@@ -39,8 +39,20 @@ function retrieveQuestions() {
 
 function validateAnswer($previousQuestion,$answer) {
 
+  if(!isset($previousQuestion) || !isset($answer) || !is_numeric($previousQuestion) || !is_numeric($answer)) {
+    throw new Exception('No valid input for function validateAnswer');
+  }
+
+  if(!isset($_SESSION['questionAnswered']) || !isset($_SESSION['questionDetails']) ||
+        !is_array($_SESSION['questionAnswered']) || !is_array($_SESSION['questionDetails'])) {
+    throw new Exception('Session variables not set properly');
+  }
+
   $correctAnswer = $_SESSION['questionDetails'][$previousQuestion]->correctAnswer;
 
+  // set session array for the previous question answered to true
+  $_SESSION['questionAnswered'][$previousQuestion] = TRUE;
+  
   if ($correctAnswer == $answer) {
     return TRUE;
   } else {
@@ -50,6 +62,11 @@ function validateAnswer($previousQuestion,$answer) {
 }
 
 function selectQuestion()  {
+
+  if(!isset($_SESSION['questionAnswered']) || !isset($_SESSION['questionDetails']) ||
+        !is_array($_SESSION['questionAnswered']) || !is_array($_SESSION['questionDetails'])) {
+    throw new Exception('Session variables not set properly');
+  }
 
   // create new array  for all relevant question details, which will also contain the answers in random order, which is not possible in the object properties
   $questionDetails = Array();
