@@ -53,18 +53,18 @@ function validateAnswer($previousQuestion,$submittedAnswer) {
   if ($correctAnswer == $submittedAnswer) {
     // if the question is correct write 1 as indicator, so later in results.php array_sum can be used
     $_SESSION['answerCorrect'][$previousQuestion] = 1;
-    return TRUE;
+    return array(TRUE,$correctAnswer);
   } else {
     // if the question is incorrect write 0 as indicator, so later in results.php array_sum can be used
     $_SESSION['answerCorrect'][$previousQuestion] = 0;
-    return FALSE;
+    return array(FALSE,$correctAnswer);
   }
 
 }
 
 function selectQuestion()  {
 
-  // validate the session variables 
+  // validate the session variables
   if(!isset($_SESSION['questionAnswered']) || !isset($_SESSION['questionDetails']) ||
         !is_array($_SESSION['questionAnswered']) || !is_array($_SESSION['questionDetails'])) {
     throw new Exception('Session variables not set properly');

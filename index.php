@@ -12,15 +12,18 @@ if (isset($_POST['previousQuestion']) && isset($_POST['submittedAnswer'])) {
     $previousQuestion = $_POST['previousQuestion'];
     $submittedAnswer = $_POST['submittedAnswer'];
 
-    if (validateAnswer($previousQuestion,$submittedAnswer)) {
+    list($result,$correctAnswer) = validateAnswer($previousQuestion,$submittedAnswer);
+
+    if ($result) {
       $resultMessage = "Well done";
     }
     else {
-      $resultMessage = "Next time better";
+      $resultMessage = "Next time better. The correct answer: " . $correctAnswer;
     }
 
   } catch (Exception $e) {
     echo 'Caught exception: ' . $e->getMessage() . "\n";
+    exit;
   }
 
 
@@ -40,6 +43,7 @@ if (empty($round)) {
   }
   catch (Exception $e) {
     echo 'Caught exception: ' . $e->getMessage() . "\n";
+    exit;
   }
 }
 
@@ -56,6 +60,7 @@ try {
 }
 catch (Exception $e) {
   echo 'Caught exception: ' . $e->getMessage() . "\n";
+  exit;
 }
 
 ?>
