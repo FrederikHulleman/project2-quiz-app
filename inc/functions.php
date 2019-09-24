@@ -14,22 +14,34 @@ function retrieveQuestions() {
   }
 
   // create questions objects from json file
-  $questionsList = json_decode(file_get_contents($path));
+  $_SESSION['questionDetails'] = json_decode(file_get_contents($path));
 
   // validate whether questions contain objects
-  if(!is_object($questionsList[0])) {
+  if(!is_object($_SESSION['questionDetails'][0])) {
     return FALSE;
   }
 
   // calculate the total number of rounds
-  $totalRounds = count($questionsList);
+  $_SESSION['totalRounds'] = count($_SESSION['questionDetails']);
 
-  return array($questionsList,$totalRounds);
+  // for the first round the session array is set will all question id's value FALSE
+  $_SESSION['questionAnswered'] = array_fill(0,$_SESSION['totalRounds'],FALSE);
+
+  // create session variable for full question list
+  // foreach ($questionsList as $key=>$question) {
+  //   $_SESSION['questionDetails'][$key] = $question;
+  // }
+
+  // var_dump($_SESSION);
+
+  return TRUE;
 }
 
-function validateAnswer($questionsList,$previousQuestion,$answer) {
+function validateAnswer($previousQuestion,$answer) {
 
-  if ($questionsList[$previousQuestion]->correctAnswer == $answer) {
+  $correctAnswer = $_SESSION['questionDetails'][$previousQuestion]->correctAnswer;
+
+  if ($correctAnswer == $answer) {
     return TRUE;
   } else {
     return FALSE;
@@ -37,7 +49,7 @@ function validateAnswer($questionsList,$previousQuestion,$answer) {
 
 }
 
-function selectQuestion($questionsList)  {
+function selectQuestion()  {
 
   // create new array  for all relevant question details, which will also contain the answers in random order, which is not possible in the object properties
   $questionDetails = Array();
@@ -50,15 +62,15 @@ function selectQuestion($questionsList)  {
   $questionDetails['currentQuestion'] = $remainingQuestions[array_rand($remainingQuestions)];
 
   // copy details from object to array
-  $questionDetails['rightAdder'] = $questionsList[$questionDetails['currentQuestion']]->rightAdder;
-  $questionDetails['leftAdder'] = $questionsList[$questionDetails['currentQuestion']]->leftAdder;
+  $questionDetails['rightAdder'] = $_SESSION['questionDetails'][$questionDetails['currentQuestion']]->rightAdder;
+  $questionDetails['leftAdder'] = $_SESSION['questionDetails'][$questionDetails['currentQuestion']]->leftAdder;
 
   // the part to put the answers in random order, making use of shuffle
   $answers = array();
   $answers = [
-              $questionsList[$questionDetails['currentQuestion']]->correctAnswer,
-              $questionsList[$questionDetails['currentQuestion']]->firstIncorrectAnswer,
-              $questionsList[$questionDetails['currentQuestion']]->secondIncorrectAnswer
+              $_SESSION['questionDetails'][$questionDetails['currentQuestion']]->correctAnswer,
+              $_SESSION['questionDetails'][$questionDetails['currentQuestion']]->firstIncorrectAnswer,
+              $_SESSION['questionDetails'][$questionDetails['currentQuestion']]->secondIncorrectAnswer
             ];
   shuffle($answers);
 

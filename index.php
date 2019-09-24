@@ -6,11 +6,6 @@ include 'inc/functions.php';
 
 $resultMessage = "";
 
-if((list($questionsList,$totalRounds) = retrieveQuestions()) === FALSE) {
-  echo "The questions could not be displayed. Try again later.";
-  exit;
-}
-
 // Keep track of which questions have been asked
 // My  approach: a question has been asked, when an answer  was submitted and NOT when it is displayed, to avoid strange situations when only refreshing
 if (isset($_POST['previousQuestion']) && isset($_POST['submittedAnswer'])) {
@@ -18,7 +13,7 @@ if (isset($_POST['previousQuestion']) && isset($_POST['submittedAnswer'])) {
   $previousQuestion = $_POST['previousQuestion'];
   $submittedAnswer = $_POST['submittedAnswer'];
 
-  if (validateAnswer($questionsList,$previousQuestion,$submittedAnswer)) {
+  if (validateAnswer($previousQuestion,$submittedAnswer)) {
     $resultMessage = "Well done";
   }
   else {
@@ -34,19 +29,21 @@ $round = filter_input(INPUT_GET,'round',FILTER_SANITIZE_NUMBER_INT);
 
 //for the first round, it is initially set to 1
 if (empty($round)) {
-  // for the first round the session array is set will all question id's value FALSE
-  $_SESSION['questionAnswered'] = array_fill(0,$totalRounds,FALSE);
+  if(retrieveQuestions() === FALSE) {
+    echo "The questions could not be displayed. Try again later.";
+    exit;
+  }
   $round = 1;
 }
 
 // after the last round, the user is redirected to the results page
-if ($round > $totalRounds) {
+if ($round > $_SESSION['totalRounds']) {
     header('location: results.php');
     exit;
 }
 
 //retrieve questions
-if (($questionDetails = selectQuestion($questionsList)) === FALSE) {
+if (($questionDetails = selectQuestion()) === FALSE) {
   echo "The questions could not be displayed. Try again later.";
   exit;
 }
@@ -66,7 +63,7 @@ if (($questionDetails = selectQuestion($questionsList)) === FALSE) {
       <div class="container">
           <div id="quiz-box">
               <p><?php echo $resultMessage; ?></p>
-              <p class="breadcrumbs">Question #<?php echo $round; ?> of #<?php echo $totalRounds; ?></p>
+              <p class="breadcrumbs">Question #<?php echo $round; ?> of #<?php echo $_SESSION['totalRounds']; ?></p>
               <p class="quiz">What is <?php echo $questionDetails["leftAdder"]; ?> + <?php echo $questionDetails["rightAdder"]; ?>?</p>
               <form action="index.php?round=<?php echo ($round+1); ?>" method="post">
                   <input type="hidden" name="previousQuestion" value="<?php echo $questionDetails["currentQuestion"]; ?>" />

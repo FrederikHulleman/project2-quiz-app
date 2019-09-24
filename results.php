@@ -1,7 +1,7 @@
 <?php
 session_start();
-echo "Congratulations";
+echo "Congratulations<br>";
 
-var_dump($_SESSION['questionAnswered']);
+var_dump($_SESSION);
 
 ?>
