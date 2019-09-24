@@ -27,36 +27,35 @@ function retrieveQuestions() {
   // for the first round the session array is set will all question id's value FALSE
   $_SESSION['questionAnswered'] = array_fill(0,$_SESSION['totalRounds'],FALSE);
 
-  // create session variable for full question list
-  // foreach ($questionsList as $key=>$question) {
-  //   $_SESSION['questionDetails'][$key] = $question;
-  // }
-
-  // var_dump($_SESSION);
-
   return TRUE;
 }
 
-function validateAnswer($previousQuestion,$answer) {
+function validateAnswer($previousQuestion,$submittedAnswer) {
 
-  if(!isset($previousQuestion) || !isset($answer) || !is_numeric($previousQuestion) || !is_numeric($answer)) {
+  // validate input variables
+  if(!isset($previousQuestion) || !isset($submittedAnswer) || !is_numeric($previousQuestion) || !is_numeric($submittedAnswer)) {
     throw new Exception('No valid input for function validateAnswer');
   }
 
+  // validate session variables
   if(!isset($_SESSION['questionAnswered']) || !isset($_SESSION['questionDetails']) ||
         !is_array($_SESSION['questionAnswered']) || !is_array($_SESSION['questionDetails'])) {
     throw new Exception('Session variables not set properly');
   }
 
+  // store correct answer from session variable
   $correctAnswer = $_SESSION['questionDetails'][$previousQuestion]->correctAnswer;
 
-  // set session array for the previous question answered to true
+  // set session array for the previous question answered to true, so it won't  be asked again
   $_SESSION['questionAnswered'][$previousQuestion] = TRUE;
 
-  if ($correctAnswer == $answer) {
+  //validate whether the submitted answer equals to the correct answer
+  if ($correctAnswer == $submittedAnswer) {
+    // if the question is correct write 1 as indicator, so later in results.php array_sum can be used
     $_SESSION['answerCorrect'][$previousQuestion] = 1;
     return TRUE;
   } else {
+    // if the question is incorrect write 0 as indicator, so later in results.php array_sum can be used
     $_SESSION['answerCorrect'][$previousQuestion] = 0;
     return FALSE;
   }
@@ -65,6 +64,7 @@ function validateAnswer($previousQuestion,$answer) {
 
 function selectQuestion()  {
 
+  // validate the session variables 
   if(!isset($_SESSION['questionAnswered']) || !isset($_SESSION['questionDetails']) ||
         !is_array($_SESSION['questionAnswered']) || !is_array($_SESSION['questionDetails'])) {
     throw new Exception('Session variables not set properly');

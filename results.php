@@ -1,5 +1,14 @@
 <?php
 session_start();
+
+if(!isset($_SESSION['answerCorrect']) || !isset($_SESSION['totalRounds']) ||
+    !is_array($_SESSION['answerCorrect']) || !is_array($_SESSION['totalRounds'])) {
+
+      echo "Results could not be displayed";
+      exit;
+}
+
+// Because each correct answer has value 1, we can sum the total score with array_sum 
 $countCorrect = array_sum($_SESSION['answerCorrect']);
 
 ?>
@@ -19,16 +28,8 @@ $countCorrect = array_sum($_SESSION['answerCorrect']);
         <div id="quiz-box">
           <p class="breadcrumbs">Results</p>
           <p class="quiz"><?php echo $countCorrect; ?> correct out of <?php echo $_SESSION['totalRounds']; ?></p>
+          <button id="startOver" class="btn" onclick="location.href='index.php';" >Start over</button>
 
-            <!-- <p><?php echo $resultMessage; ?></p>
-            <p class="breadcrumbs">Question #<?php echo $round; ?> of #<?php echo $_SESSION['totalRounds']; ?></p>
-            <p class="quiz">What is <?php echo $questionDetails["leftAdder"]; ?> + <?php echo $questionDetails["rightAdder"]; ?>?</p>
-            <form action="index.php?round=<?php echo ($round+1); ?>" method="post">
-                <input type="hidden" name="previousQuestion" value="<?php echo $questionDetails["currentQuestion"]; ?>" />
-                <input type="submit" class="btn" name="submittedAnswer" value="<?php echo $questionDetails["firstAnswer"]; ?>" />
-                <input type="submit" class="btn" name="submittedAnswer" value="<?php echo $questionDetails["secondAnswer"]; ?>" />
-                <input type="submit" class="btn" name="submittedAnswer" value="<?php echo $questionDetails["thirdAnswer"]; ?>" />
-            </form> -->
 
 
         </div>

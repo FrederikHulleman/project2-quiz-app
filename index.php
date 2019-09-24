@@ -6,8 +6,7 @@ include 'inc/functions.php';
 
 $resultMessage = "";
 
-// Keep track of which questions have been asked
-// My  approach: a question has been asked, when an answer  was submitted and NOT when it is displayed, to avoid strange situations when only refreshing
+//handle the given answers
 if (isset($_POST['previousQuestion']) && isset($_POST['submittedAnswer'])) {
   try {
     $previousQuestion = $_POST['previousQuestion'];
@@ -35,10 +34,9 @@ if (empty($round)) {
   try {
     session_destroy();
     session_start();
+    //retrieve the full list of questions and store it in the session
     retrieveQuestions();
     $round = 1;
-    // echo "The questions could not be displayed. Try again later.";
-    // exit;
   }
   catch (Exception $e) {
     echo 'Caught exception: ' . $e->getMessage() . "\n";
@@ -51,7 +49,7 @@ if ($round > $_SESSION['totalRounds']) {
     exit;
 }
 
-//select question
+//select random question
 try {
   $questionDetails = selectQuestion();
 
