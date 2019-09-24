@@ -6,6 +6,11 @@ include 'inc/functions.php';
 
 $resultMessage = "";
 
+if((list($questionsList,$totalRounds) = retrieveQuestions()) === FALSE) {
+  echo "The questions could not be displayed. Try again later.";
+  exit;
+}
+
 // Keep track of which questions have been asked
 // My  approach: a question has been asked, when an answer  was submitted and NOT when it is displayed, to avoid strange situations when only refreshing
 if (isset($_POST['previousQuestion']) && isset($_POST['submittedAnswer'])) {
@@ -13,7 +18,7 @@ if (isset($_POST['previousQuestion']) && isset($_POST['submittedAnswer'])) {
   $previousQuestion = $_POST['previousQuestion'];
   $submittedAnswer = $_POST['submittedAnswer'];
 
-  if (validateAnswer($previousQuestion,$submittedAnswer)) {
+  if (validateAnswer($questionsList,$previousQuestion,$submittedAnswer)) {
     $resultMessage = "Well done";
   }
   else {
@@ -22,12 +27,6 @@ if (isset($_POST['previousQuestion']) && isset($_POST['submittedAnswer'])) {
 
   // set session array for the previous question answered to true
   $_SESSION['questionAnswered'][$previousQuestion] = TRUE;
-}
-
-//retrieve questions
-if ((list($questionDetails,$currentQuestion,$totalRounds) = selectQuestion()) === FALSE) {
-  echo "The questions could not be displayed. Try again later.";
-  exit;
 }
 
 //the round keeps track of how far the user got
@@ -44,6 +43,12 @@ if (empty($round)) {
 if ($round > $totalRounds) {
     header('location: results.php');
     exit;
+}
+
+//retrieve questions
+if (($questionDetails = selectQuestion($questionsList)) === FALSE) {
+  echo "The questions could not be displayed. Try again later.";
+  exit;
 }
 
 ?>
@@ -64,7 +69,7 @@ if ($round > $totalRounds) {
               <p class="breadcrumbs">Question #<?php echo $round; ?> of #<?php echo $totalRounds; ?></p>
               <p class="quiz">What is <?php echo $questionDetails["leftAdder"]; ?> + <?php echo $questionDetails["rightAdder"]; ?>?</p>
               <form action="index.php?round=<?php echo ($round+1); ?>" method="post">
-                  <input type="hidden" name="previousQuestion" value="<?php echo $currentQuestion; ?>" />
+                  <input type="hidden" name="previousQuestion" value="<?php echo $questionDetails["currentQuestion"]; ?>" />
                   <input type="submit" class="btn" name="submittedAnswer" value="<?php echo $questionDetails["firstAnswer"]; ?>" />
                   <input type="submit" class="btn" name="submittedAnswer" value="<?php echo $questionDetails["secondAnswer"]; ?>" />
                   <input type="submit" class="btn" name="submittedAnswer" value="<?php echo $questionDetails["thirdAnswer"]; ?>" />
