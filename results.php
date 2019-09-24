@@ -1,14 +1,15 @@
 <?php
 session_start();
 
+//validate session variables 
 if(!isset($_SESSION['answerCorrect']) || !isset($_SESSION['totalRounds']) ||
-    !is_array($_SESSION['answerCorrect']) || !is_array($_SESSION['totalRounds'])) {
+    !is_array($_SESSION['answerCorrect']) || !is_numeric($_SESSION['totalRounds'])) {
 
       echo "Results could not be displayed";
       exit;
 }
 
-// Because each correct answer has value 1, we can sum the total score with array_sum 
+// Because each correct answer has value 1, we can sum the total score with array_sum
 $countCorrect = array_sum($_SESSION['answerCorrect']);
 
 ?>
