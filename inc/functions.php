@@ -52,10 +52,12 @@ function validateAnswer($previousQuestion,$answer) {
 
   // set session array for the previous question answered to true
   $_SESSION['questionAnswered'][$previousQuestion] = TRUE;
-  
+
   if ($correctAnswer == $answer) {
+    $_SESSION['answerCorrect'][$previousQuestion] = 1;
     return TRUE;
   } else {
+    $_SESSION['answerCorrect'][$previousQuestion] = 0;
     return FALSE;
   }
 
