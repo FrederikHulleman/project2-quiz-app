@@ -1,35 +1,52 @@
 <?php
 
-// a one time function to retrieve all questions and answers, store it in the session variables and prep some other stuff, like 'totalRounds'
+// generate questions & answers and store them in a session variable
 function retrieveQuestions() {
 
-  // created this function, so I'm flexible when I want to change the source of the $questions
-  // so i won't have to change index.php
+  //set number of desired rounds
+  $totalRounds = 10;
 
-  // path to JSON file with questions
-  $path = 'inc/questions.json';
+  // Generate random questions
+  // Loop for required number of questions
+  // Add question and answer to questions array
+  for ($count=0; $count < $totalRounds; $count++) {
 
-  //validate whether path exists, to avoid errors in the json_decode later
-  if (!file_exists($path)) {
-    throw new Exception('Path to JSON file does not exist.');
+    // Get random numbers to add
+    // all left adders are spread over different decimal blocks, calculated based on $count
+    $questionDetails[$count]['leftAdder'] = rand((10*$count)+1,($count+1)*10);
+
+    // to reduce complexity, the right adder is <=50, when the left adder is >50
+    if($questionDetails[$count]['leftAdder'] < 50) {
+      $questionDetails[$count]['rightAdder'] = rand(1,99);
+    } else {
+      $questionDetails[$count]['rightAdder'] = rand(1,50);
+    }
+
+    // Calculate correct answer
+    $questionDetails[$count]['correctAnswer'] =  $questionDetails[$count]['leftAdder'] + $questionDetails[$count]['rightAdder'];
+
+    // Get incorrect answers within 10 numbers either way of correct answer
+    // Make sure it is a unique answer;
+    // this is implemented by having fixed ranges around the correct answer
+    // first incorrect is always lower. second incorrect always higher
+    // since answers are shuffled, this approach is fine
+    $questionDetails[$count]['firstIncorrectAnswer'] = rand($questionDetails[$count]['correctAnswer']-10,$questionDetails[$count]['correctAnswer']-1);
+    $questionDetails[$count]['secondIncorrectAnswer'] = rand($questionDetails[$count]['correctAnswer']+1,$questionDetails[$count]['correctAnswer']+10);
+
   }
 
-  // create questions objects from json file and store it in a session variable
-  $_SESSION['questionDetails'] = json_decode(file_get_contents($path));
+  // store questions & answers in a session variable
+  $_SESSION['questionDetails'] = $questionDetails;
 
-  // validate whether the new session variable contains objects
-  if(!is_object($_SESSION['questionDetails'][0])) {
-    throw new Exception('File does not contain valid JSON objects.');
-  }
-
-  // calculate the total number of rounds
-  $_SESSION['totalRounds'] = count($_SESSION['questionDetails']);
+  // store the total number of rounds in the session variable
+  $_SESSION['totalRounds'] = $totalRounds;
 
   // for the first round the session array is set will all question id's value FALSE
   // this i'll use to validate in function selectQuestion whether a question has been asked or not
-  $_SESSION['questionAnswered'] = array_fill(0,$_SESSION['totalRounds'],FALSE);
+  $_SESSION['questionAnswered'] = array_fill(0,$totalRounds,FALSE);
 
   return TRUE;
+
 }
 
 // this function validates the answer on the previous question, updates session variables to make sure the question is not raised again
@@ -51,12 +68,15 @@ function validateAnswer($previousQuestion,$submittedAnswer) {
   $_SESSION['questionAnswered'][$previousQuestion] = TRUE;
 
   //validate whether the submitted answer equals to the correct answer and return the correctAnswer so it can be shown to the user
-  if ($_SESSION['questionDetails'][$previousQuestion]->correctAnswer == $submittedAnswer) {
+  if ($_SESSION['questionDetails'][$previousQuestion]['correctAnswer'] == $submittedAnswer) {
     // if the question is correct write 1 as indicator, so later in results.php array_sum can be used
     $_SESSION['answerCorrect'][$previousQuestion] = 1;
-    return array(TRUE,$_SESSION['questionDetails'][$previousQuestion]->correctAnswer);
+    return array(TRUE,$_SESSION['questionDetails'][$previousQuestion]['correctAnswer']);
   } else {
-    return array(FALSE,$_SESSION['questionDetails'][$previousQuestion]->correctAnswer);
+    // if the question is inccorrect write 0 as indicator, so later in results.php array_sum can be used
+    // this is only necessary to make sure the array_sum is working properly, in case all answers are incorrect
+    $_SESSION['answerCorrect'][$previousQuestion] = 0;
+    return array(FALSE,$_SESSION['questionDetails'][$previousQuestion]['correctAnswer']);
   }
 
 }
@@ -79,15 +99,15 @@ function selectQuestion()  {
   // randomly select ID of one of the remaining questions
   $questionDetails['currentQuestion'] = $remainingQuestions[array_rand($remainingQuestions)];
 
-  // copy details from object to array
-  $questionDetails['rightAdder'] = $_SESSION['questionDetails'][$questionDetails['currentQuestion']]->rightAdder;
-  $questionDetails['leftAdder'] = $_SESSION['questionDetails'][$questionDetails['currentQuestion']]->leftAdder;
+  // copy details from session to array
+  $questionDetails['rightAdder'] = $_SESSION['questionDetails'][$questionDetails['currentQuestion']]['rightAdder'];
+  $questionDetails['leftAdder'] = $_SESSION['questionDetails'][$questionDetails['currentQuestion']]['leftAdder'];
 
   // the part to put the answers in random order, making use of shuffle
   $answers = [
-              $_SESSION['questionDetails'][$questionDetails['currentQuestion']]->correctAnswer,
-              $_SESSION['questionDetails'][$questionDetails['currentQuestion']]->firstIncorrectAnswer,
-              $_SESSION['questionDetails'][$questionDetails['currentQuestion']]->secondIncorrectAnswer
+              $_SESSION['questionDetails'][$questionDetails['currentQuestion']]['correctAnswer'],
+              $_SESSION['questionDetails'][$questionDetails['currentQuestion']]['firstIncorrectAnswer'],
+              $_SESSION['questionDetails'][$questionDetails['currentQuestion']]['secondIncorrectAnswer']
             ];
   shuffle($answers);
 
