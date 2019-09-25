@@ -26,9 +26,9 @@ $countCorrect = array_sum($_SESSION['answerCorrect']);
 <body>
 
     <div class="container">
-        <div id="quiz-box">
+        <div id="result-box">
           <p class="result">Results</p>
-          <p class="quiz"><?php echo $countCorrect; ?> correct out of <?php echo $_SESSION['totalRounds']; ?></p>
+          <p class="score"><?php echo $countCorrect; ?> correct out of <?php echo $_SESSION['totalRounds']; ?></p>
           <button id="start-over" class="btn" onclick="location.href='index.php';" >Start over</button>
 
 
