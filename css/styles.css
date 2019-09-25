@@ -1,4 +1,4 @@
-/* Random Quote Generator Styles */
+/* Math quiz addition Styles */
 
 body {
   font-family: 'Playfair Display', serif;
@@ -11,6 +11,31 @@ body {
   right: 10%;
   width: 80%;
   line-height: .5;
+  /* text-align: center;   */
+}
+
+#start-over {
+  margin-top: 50px;
+}
+
+.result {
+  /* display: inline-block; */
+  position: absolute;
+  width: 100%;
+  text-align: center;
+  font-weight: bold;
+  margin-top: -50px;
+  margin-bottom: 50px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid black;
+}
+
+.correct {
+  color: rgb(28, 129, 3);
+}
+
+.incorrect {
+  color: rgb(235, 162, 20);
 }
 
 .quiz {

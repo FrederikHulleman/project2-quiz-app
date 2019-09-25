@@ -14,12 +14,17 @@ if (isset($_POST['previousQuestion']) && isset($_POST['submittedAnswer'])) {
 
     list($result,$correctAnswer) = validateAnswer($previousQuestion,$submittedAnswer);
 
+    $resultMessage = "<p class=\"result ";
+
     if ($result) {
-      $resultMessage = "Well done";
+      $resultMessage .= "correct\">Well done";
+
     }
     else {
-      $resultMessage = "Next time better. The correct answer: " . $correctAnswer;
+      $resultMessage .= "incorrect\">Better luck next time. The correct answer is: " . $correctAnswer;
     }
+
+    $resultMessage .= "</p>";
 
   } catch (Exception $e) {
     echo 'Caught exception: ' . $e->getMessage() . "\n";
@@ -35,8 +40,10 @@ $round = filter_input(INPUT_GET,'round',FILTER_SANITIZE_NUMBER_INT);
 //for the first round, it is initially set to 1
 if (empty($round)) {
   try {
+    //since it's the first round, previous sessions should be killed and a new session should be started
     session_destroy();
     session_start();
+
     //retrieve the full list of questions and store it in the session
     retrieveQuestions();
     $round = 1;
@@ -77,7 +84,7 @@ catch (Exception $e) {
 
       <div class="container">
           <div id="quiz-box">
-              <p><?php echo $resultMessage; ?></p>
+              <?php echo $resultMessage; ?>
               <p class="breadcrumbs">Question #<?php echo $round; ?> of #<?php echo $_SESSION['totalRounds']; ?></p>
               <p class="quiz">What is <?php echo $questionDetails["leftAdder"]; ?> + <?php echo $questionDetails["rightAdder"]; ?>?</p>
               <form action="index.php?round=<?php echo ($round+1); ?>" method="post">
