@@ -27,11 +27,21 @@ function retrieveQuestions() {
 
     // Get incorrect answers within 10 numbers either way of correct answer
     // Make sure it is a unique answer;
-    // this is implemented by having fixed ranges around the correct answer
-    // first incorrect is always lower. second incorrect always higher
-    // since answers are shuffled, this approach is fine
-    $questionDetails[$count]['firstIncorrectAnswer'] = rand($questionDetails[$count]['correctAnswer']-10,$questionDetails[$count]['correctAnswer']-1);
-    $questionDetails[$count]['secondIncorrectAnswer'] = rand($questionDetails[$count]['correctAnswer']+1,$questionDetails[$count]['correctAnswer']+10);
+
+    //picking two random answers is done by making a list with all possible values between -10 en +10 around the correct answer
+    $answersRange = range($questionDetails[$count]['correctAnswer']-10,$questionDetails[$count]['correctAnswer']+10);
+
+    //then the correct answer is removed, to make sure the incorrect answers won't match with the correct answer
+    unset($answersRange[array_search($questionDetails[$count]['correctAnswer'],$answersRange)]);
+
+    //the 1st incorrect answer is selected
+    $questionDetails[$count]['firstIncorrectAnswer'] = $answersRange[array_rand($answersRange)];
+
+    //the 1st correct answer is removed, to make sure the the 2nd incorrect answer won't match
+    unset($answersRange[array_search($questionDetails[$count]['firstIncorrectAnswer'],$answersRange)]);
+
+    //the 2nd incorrect answer is selected  
+    $questionDetails[$count]['secondIncorrectAnswer'] = $answersRange[array_rand($answersRange)];
 
   }
 
@@ -115,6 +125,8 @@ function selectQuestion()  {
   $questionDetails['firstAnswer'] = $answers[0];
   $questionDetails['secondAnswer'] = $answers[1];
   $questionDetails['thirdAnswer'] = $answers[2];
+
+  unset($answers);
 
   // return the question details, the ID of the selected question (currentQuestion) and the total number of rounds
   return $questionDetails;
